@@ -1,6 +1,7 @@
 #include "utils.h"
 
-char* readfile(FILE* fp) {
+char* readfile(FILE* fp)
+{
 	char* ret = malloc(0);
 	int size = 0;
 	char c;

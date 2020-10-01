@@ -1,8 +1,13 @@
 #include "keybinds.h"
 #include "utils.h"
 
-struct keybind_arr read_keybinds(char* filename) {
+struct keybind_arr read_keybinds(char* filename)
+{
 	FILE* fp = fopen(filename, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Couldn't open keybinds file: %s", filename);
+		exit(1);
+	}
 	char* content = readfile(fp);
 
 	int num_splits = 0;

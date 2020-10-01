@@ -1,2 +1,13 @@
-all:
-	gcc -o main src/listener.c src/exec.c src/keybinds.c src/main.c src/utils.c -pthread -framework CoreGraphics -framework CoreFoundation -framework Carbon
+CC = gcc
+CFLAGS = -Wall
+LDFLAGS = -pthread -framework CoreGraphics -framework CoreFoundation -framework Carbon
+
+main: build/exec.o build/keybinds.o build/listener.o build/main.o build/utils.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+build/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf main
+	rm -rf build/*

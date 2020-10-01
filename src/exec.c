@@ -1,62 +1,77 @@
 #include "exec.h"
-#include "utils.h"
 
-struct screen_sizes get_desktop_size() {
+struct screen_sizes get_desktop_sizes()
+{
 	FILE* proc = popen("cat scripts/desktop_size.script | osascript", "r");
 	if (proc == NULL) {
 		fprintf(stderr, "Something went wrong :(");
 		exit(1);
 	}
+
 	char* output = readfile(proc);
 
-	int nums = 1;
+	int num_windows = 1;
 	for (int i = 0; i < strlen(output); i++) {
 		if (output[i] == ' ') {
-			nums ++;
+			num_windows ++;
 		}
 	}
 
-	struct screen_sizes ret = {nums / 4, malloc(nums * sizeof(int))};
+	num_windows = num_windows / 4;
+	struct screen_sizes ret = {malloc(sizeof(struct screen_size) * num_windows), num_windows};
+	char* output_cpy = output;
+	float buffer[4];
 
-	char buffer[8]; // Hopefully there screen isnt't bigger then 10 mil pixels
-	int buffer_len = 0;
-	int current_num = 0;
-
-	for (int i = 0; i < strlen(output); i++) {
-		if (output[i] == ' ') {
-			ret.sizes[current_num++] = atoi(buffer);
-			memset(buffer, 0, 8);
-			buffer_len = 0;
-		} else {
-			buffer[buffer_len++] = output[i];
-		}
+	for (int i = 0; i < num_windows; i++) {
+		output_cpy += sscanf(output_cpy, "%f %f %f %f",
+				buffer, buffer + 1, buffer + 2, buffer + 3) + 1;
+		ret.arr[i] = (struct screen_size) {
+			.x = buffer[0],
+			.y = buffer[1],
+			.dx = buffer[2] - buffer[0],
+			.dy = buffer[3] - buffer[1],
+		};
 	}
-
-	ret.sizes[current_num++] = atoi(buffer);
 
 	free(output);
+	pclose(proc);
+
 	return ret;
 }
 
-struct screen_sizes get_window_size() {
-	FILE* proc = popen("cat scripts/screen_size.script | osascript", "r");
+struct screen_size get_window_size()
+{
+	FILE* proc = popen("cat scripts/window_size.script | osascript", "r");
 	if (proc == NULL) {
 		fprintf(stderr, "Something went wrong :(");
 		exit(1);
 	}
+
 	char* output = readfile(proc);
+	float buffer[4];
 
-	struct screen_sizes ret = {1, malloc(4 * sizeof(int))};
-
-	sscanf(output, "%d %d %d %d", ret.sizes, ret.sizes + 1,
-			ret.sizes + 2, ret.sizes + 3);
+	sscanf(output, "%f %f %f %f", buffer, buffer + 1,
+			buffer + 2, buffer + 3);
 
 	free(output);
-	return ret;
+	pclose(proc);
+
+	return (struct screen_size) {
+		.x = buffer[0],
+		.y = buffer[1], 
+		.dx = buffer[2] - buffer[0],
+		.dy = buffer[3] - buffer[1],
+	};
 }
 
-void resize_current_window(int p1, int p2, int p3, int p4) {
+void resize_current_window(int p1, int p2, int p3, int p4)
+{
 	FILE* fp = fopen("scripts/resize.script", "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Couldn't open resize.script");
+		exit(1);
+	}
+
 	char* script = readfile(fp);
 	char* format_buffer1 = malloc(strlen(script) + 100);
 	char* format_buffer2 = malloc(strlen(script) + 100);
@@ -69,4 +84,5 @@ void resize_current_window(int p1, int p2, int p3, int p4) {
 	free(script);
 	free(format_buffer1);
 	free(format_buffer2);
+	fclose(fp);
 }

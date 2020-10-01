@@ -5,7 +5,8 @@ bool escape_seq = false;
 bool ctrl = false;
 int window = -1; // -1 is the none type
 
-int keycodeIsNum(int keycode) {
+int keycodeIsNum(int keycode)
+{
 	switch (keycode) {
 		case kVK_ANSI_1:
 			return 1;
@@ -30,7 +31,8 @@ int keycodeIsNum(int keycode) {
 	}
 }
 
-char keycode_to_char(CGKeyCode keycode) {
+char keycode_to_char(CGKeyCode keycode)
+{
 	switch (keycode) {
 		case kVK_ANSI_A: return 'a';
 		case kVK_ANSI_B: return 'b';
@@ -62,7 +64,8 @@ char keycode_to_char(CGKeyCode keycode) {
 	}
 }
 
-CGEventRef handler(CGEventTapProxy proxy, CGEventType event_type, CGEventRef event, void *userInfo) {
+CGEventRef handler(CGEventTapProxy proxy, CGEventType event_type, CGEventRef event, void *userInfo)
+{
 	CGKeyCode keycode = (CGKeyCode) CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
 
 	if (escape_seq && event_type == kCGEventKeyDown) {
@@ -88,7 +91,8 @@ CGEventRef handler(CGEventTapProxy proxy, CGEventType event_type, CGEventRef eve
 	return event;
 }
 
-int start_listener() {
+int start_listener()
+{
 	CGEventMask event_mask = (1 << kCGEventKeyDown) | 
 		(1 << kCGEventKeyUp) | 
 		(1 << kCGEventFlagsChanged);
