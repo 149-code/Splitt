@@ -1,0 +1,5 @@
+set activeApp to (path to frontmost application as text)
+
+tell application activeApp
+	set bounds of front window to {%d, %d, %d, %d}
+end tell

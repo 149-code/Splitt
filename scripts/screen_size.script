@@ -1,0 +1,11 @@
+set AppleScript's text item delimiters to " "
+
+set activeApp to (path to frontmost application as text)
+
+set windowBounds to {}
+tell application activeApp
+	set windowBounds to (bounds of front window)
+end tell
+
+do shell script "echo " & windowBounds
+
