@@ -20,14 +20,12 @@ void do_shortcut(char c, int window)
 	struct screen_size window_size = get_window_size();
 	struct keybind_arr keybinds = read_keybinds("data/keybinds");
 
-	printf("DEBUG\n");
-	fflush(stdout);
-
 	struct screen_size curr_desktop = desktop_sizes.arr[get_current_window(
 			desktop_sizes, window_size)];
 
 	for (int i = 0; i < keybinds.len; i++) {
 		if (keybinds.arr[i].escape_char == c) {
+
 			if (window == -1) {
 				resize_current_window(
 						curr_desktop.x + curr_desktop.dx * (keybinds.arr[i].window_pos[0]),
@@ -41,8 +39,5 @@ void do_shortcut(char c, int window)
 
 int main()
 {
-	for (int i = 0; i < 100; i++) {
-		do_shortcut('a', -1);
-	}
-	//start_listener();
+	start_listener();
 }
