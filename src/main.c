@@ -20,19 +20,21 @@ void do_shortcut(char c, int window)
 	struct screen_size window_size = get_window_size();
 	struct keybind_arr keybinds = read_keybinds("data/keybinds");
 
-	struct screen_size curr_desktop = desktop_sizes.arr[get_current_window(
-			desktop_sizes, window_size)];
+	struct screen_size curr_desktop;
+	if (window == -1) {
+		curr_desktop = desktop_sizes.arr[get_current_window(
+				desktop_sizes, window_size)];
+	} else {
+		curr_desktop = desktop_sizes.arr[window - 1];
+	}
 
 	for (int i = 0; i < keybinds.len; i++) {
 		if (keybinds.arr[i].escape_char == c) {
-
-			if (window == -1) {
-				resize_current_window(
-						curr_desktop.x + curr_desktop.dx * (keybinds.arr[i].window_pos[0]),
-						curr_desktop.y + curr_desktop.dy * (keybinds.arr[i].window_pos[1]),
-						curr_desktop.x + curr_desktop.dx * (keybinds.arr[i].window_pos[2]),
-						curr_desktop.y + curr_desktop.dy * (keybinds.arr[i].window_pos[3]));
-			}
+			resize_current_window(
+					curr_desktop.x + curr_desktop.dx * (keybinds.arr[i].window_pos[0]),
+					curr_desktop.y + curr_desktop.dy * (keybinds.arr[i].window_pos[1]),
+					curr_desktop.x + curr_desktop.dx * (keybinds.arr[i].window_pos[2]),
+					curr_desktop.y + curr_desktop.dy * (keybinds.arr[i].window_pos[3]));
 		}
 	}
 }

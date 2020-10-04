@@ -83,7 +83,7 @@ CGEventRef handler(CGEventTapProxy proxy, CGEventType event_type, CGEventRef eve
 		ctrl = !ctrl;
 	}
 
-	if (ctrl && event_type == kCGEventKeyDown && keycode == kVK_ANSI_A) {
+	if (ctrl && event_type == kCGEventKeyDown && keycode == kVK_ANSI_S) {
 		escape_seq = true;
 		return NULL;
 	}
