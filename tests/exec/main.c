@@ -2,9 +2,8 @@
 #include <stdio.h>
 
 int main() {
-	struct screen_sizes screens = check_screen_sizes();
+	resize_current_window(50, 50, 595, 360);
 
-	for (int i = 0; i < 4; i++) {
-		printf("%d ", screens.sizes[i]);
-	}
+	struct screen_size screen = get_window_size();
+	printf("%f %f %f %f\n", screen.x, screen.y, screen.dx, screen.dy);
 }

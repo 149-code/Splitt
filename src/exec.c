@@ -1,88 +1,108 @@
 #include "exec.h"
 
-struct screen_sizes get_desktop_sizes()
+int get_frontmost_application()
 {
-	FILE* proc = popen("cat scripts/desktop_size.script | osascript", "r");
-	if (proc == NULL) {
-		fprintf(stderr, "Something went wrong :(");
-		exit(1);
-	}
+	CFArrayRef window_list = CGWindowListCopyWindowInfo(
+		kCGWindowListExcludeDesktopElements | kCGWindowListOptionOnScreenOnly, 
+		kCGNullWindowID);
 
-	char* output = readfile(proc);
+	int num_windows = CFArrayGetCount(window_list);
 
-	int num_windows = 1;
-	for (int i = 0; i < strlen(output); i++) {
-		if (output[i] == ' ') {
-			num_windows ++;
+	for (int i = 0; i < num_windows; i++) {
+		CFDictionaryRef dict = CFArrayGetValueAtIndex(window_list, i);
+		CFNumberRef objc_window_layer = CFDictionaryGetValue(dict, kCGWindowLayer);
+
+		int window_layer;
+		CFNumberGetValue(objc_window_layer, kCFNumberIntType, &window_layer);
+
+		if (window_layer == 0) {
+			CFNumberRef objc_window_pid = CFDictionaryGetValue(dict, kCGWindowOwnerPID);
+
+			int window_pid = 0;
+			CFNumberGetValue(objc_window_pid, kCFNumberIntType, &window_pid);
+
+			return window_pid;
 		}
 	}
 
-	num_windows = num_windows / 4;
-	struct screen_sizes ret = {malloc(sizeof(struct screen_size) * num_windows), num_windows};
-	char* output_cpy = output;
-	float buffer[4];
-
-	for (int i = 0; i < num_windows; i++) {
-		output_cpy += sscanf(output_cpy, "%f %f %f %f",
-				buffer, buffer + 1, buffer + 2, buffer + 3) + 1;
-		ret.arr[i] = (struct screen_size) {
-			.x = buffer[0],
-			.y = buffer[1],
-			.dx = buffer[2] - buffer[0],
-			.dy = buffer[3] - buffer[1],
-		};
-	}
-
-	free(output);
-	pclose(proc);
-
-	return ret;
-}
-
-struct screen_size get_window_size()
-{
-	FILE* proc = popen("cat scripts/window_size.script | osascript", "r");
-	if (proc == NULL) {
-		fprintf(stderr, "Something went wrong :(");
-		exit(1);
-	}
-
-	char* output = readfile(proc);
-	float buffer[4];
-
-	sscanf(output, "%f %f %f %f", buffer, buffer + 1,
-			buffer + 2, buffer + 3);
-
-	free(output);
-	pclose(proc);
-
-	return (struct screen_size) {
-		.x = buffer[0],
-		.y = buffer[1], 
-		.dx = buffer[2] - buffer[0],
-		.dy = buffer[3] - buffer[1],
-	};
+	return -1;
 }
 
 void resize_current_window(int p1, int p2, int p3, int p4)
 {
-	FILE* fp = fopen("scripts/resize.script", "r");
-	if (fp == NULL) {
-		fprintf(stderr, "Couldn't open resize.script");
-		exit(1);
+	int pid = get_frontmost_application();
+	if (pid == -1)
+		return;
+
+	AXUIElementRef app = AXUIElementCreateApplication(pid);
+	AXUIElementRef win;
+
+	AXUIElementCopyAttributeValue(app, kAXMainWindowAttribute, (CFTypeRef*) &win);
+
+	CGPoint point = {p1, p2};
+	CGSize size = {p3, p4};
+
+	CFTypeRef objc_point = (CFTypeRef) (AXValueCreate(kAXValueCGPointType, (void *) &point));
+	CFTypeRef objc_size = (CFTypeRef) (AXValueCreate(kAXValueCGSizeType, (void*) &size));
+
+	AXUIElementSetAttributeValue(win, kAXPositionAttribute, objc_point);
+	AXUIElementSetAttributeValue(win, kAXSizeAttribute, objc_size);
+}
+
+struct screen_size get_window_size()
+{
+	int pid = get_frontmost_application();
+	if (pid == -1)
+		return (struct screen_size) {0, 0, 0, 0,};
+
+	AXUIElementRef app = AXUIElementCreateApplication(pid);
+	AXUIElementRef win;
+
+	AXError error = AXUIElementCopyAttributeValue(app, kAXMainWindowAttribute, (CFTypeRef*) &win);
+
+	CGPoint point;
+	CFTypeRef objc_point;
+
+	CGSize size;
+	CFTypeRef objc_size;
+
+	AXUIElementCopyAttributeValue(win, kAXPositionAttribute, &objc_point);
+	AXValueGetValue(objc_point, kAXValueCGPointType, &point);
+
+	AXUIElementCopyAttributeValue(win, kAXSizeAttribute, &objc_size);
+	AXValueGetValue(objc_size, kAXValueCGSizeType, &size);
+
+	struct screen_size ret = {
+		.x = point.x,
+		.y = point.y,
+		.dx = size.width,
+		.dy = size.height,
+	};
+
+	return ret;
+}
+
+struct screen_sizes get_desktop_sizes()
+{
+	CGDirectDisplayID display_buffer[9];
+	unsigned int num_displays;
+
+	CGGetActiveDisplayList(9, display_buffer, &num_displays);
+
+	struct screen_sizes ret = {
+		.len = num_displays,
+		.arr = malloc(sizeof(struct screen_size) * num_displays),
+	};
+
+	for (int i = 0; i < num_displays; i++) {
+		CGRect display_bounds = CGDisplayBounds(display_buffer[i]);
+		ret.arr[i] = (struct screen_size) {
+			.x = display_bounds.origin.x,
+			.y = display_bounds.origin.y,
+			.dx = display_bounds.size.width,
+			.dy = display_bounds.size.height,
+		};
 	}
 
-	char* script = readfile(fp);
-	char* format_buffer1 = malloc(strlen(script) + 100);
-	char* format_buffer2 = malloc(strlen(script) + 100);
-
-	sprintf(format_buffer1, script, p1, p2, p3, p4);
-	sprintf(format_buffer2, "echo '%s' | osascript", format_buffer1);
-
-	popen(format_buffer2, "r");
-
-	free(script);
-	free(format_buffer1);
-	free(format_buffer2);
-	fclose(fp);
+	return ret;
 }
