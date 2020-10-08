@@ -1,9 +1,0 @@
-set AppleScript's text item delimiters to " "
-
-use AppleScript version "2.4" -- Yosemite (10.10) or later
-use framework "Foundation"
-use framework "AppKit"
-use scripting additions
-
-set allFrames to (current application's NSScreen's screens()'s valueForKey:"frame") as list
-do shell script "echo " & allFrames
