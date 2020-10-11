@@ -28,7 +28,7 @@ int get_frontmost_application()
 	return -1;
 }
 
-void resize_current_window(int p1, int p2, int p3, int p4)
+void resize_current_window(int x, int y, int dx, int dy)
 {
 	int pid = get_frontmost_application();
 	if (pid == -1)
@@ -39,8 +39,8 @@ void resize_current_window(int p1, int p2, int p3, int p4)
 
 	AXUIElementCopyAttributeValue(app, kAXMainWindowAttribute, (CFTypeRef*) &win);
 
-	CGPoint point = {p1, p2};
-	CGSize size = {p3, p4};
+	CGPoint point = {x, y};
+	CGSize size = {dx, dy};
 
 	CFTypeRef objc_point = (CFTypeRef) (AXValueCreate(kAXValueCGPointType, (void *) &point));
 	CFTypeRef objc_size = (CFTypeRef) (AXValueCreate(kAXValueCGSizeType, (void*) &size));

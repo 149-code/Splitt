@@ -1,5 +1,4 @@
 #include "listener.h"
-#include "main.h"
 
 bool escape_seq = false;
 bool ctrl = false;

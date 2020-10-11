@@ -39,25 +39,13 @@ void resize_current_window(int p1, int p2, int p3, int p4)
 
 	AXUIElementCopyAttributeValue(app, kAXMainWindowAttribute, (CFTypeRef*) &win);
 
-/*
-	CGPoint point = (CGPoint) {
-		.x = p1,
-		.y = p2
-	};
-
-	CGSize size = (CGSize) {
-		.height = p1 + p3,
-		.width = p2 + p4
-	};
-*/
-
 	CGPoint point = {p1, p2};
-	CGSize size = {p3, p4};
+	CGSize size = {p1 + p3, p2 + p4};
 
 	CFTypeRef objc_point = (CFTypeRef) (AXValueCreate(kAXValueCGPointType, (void *) &point));
-	AXUIElementSetAttributeValue(win, kAXPositionAttribute, objc_point);
-
 	CFTypeRef objc_size = (CFTypeRef) (AXValueCreate(kAXValueCGSizeType, (void*) &size));
+
+	AXUIElementSetAttributeValue(win, kAXPositionAttribute, objc_point);
 	AXUIElementSetAttributeValue(win, kAXSizeAttribute, objc_size);
 }
 
