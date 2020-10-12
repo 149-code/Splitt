@@ -6,6 +6,7 @@
 //
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "swift_bindings.h"
@@ -35,6 +36,7 @@ void start_splitt_deamon()
         sleep(1);
         if (ret_val != 0) {
                 alert_permission_error();
+		exit(1);
         }
 }
 
