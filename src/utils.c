@@ -6,7 +6,8 @@ char* readfile(FILE* fp)
 	int size = 0;
 	char c;
 
-	while ((c = fgetc(fp)) != EOF) {
+	while ((c = fgetc(fp)) != EOF)
+	{
 		ret = realloc(ret, size + 1);
 		ret[size++] = c;
 	}
@@ -15,4 +16,10 @@ char* readfile(FILE* fp)
 	ret[size] = '\0';
 
 	return ret;
+}
+
+void panic(char* msg)
+{
+	fprintf(stderr, "%s\n", msg);
+	exit(1);
 }

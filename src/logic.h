@@ -10,5 +10,6 @@
 #include "exec.h"
 
 void do_shortcut(char c, int window);
+void panic(char* msg);
 
 #endif
