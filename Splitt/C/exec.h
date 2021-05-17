@@ -17,14 +17,20 @@ struct screen_size {
 	float dy;
 };
 
-struct screen_sizes {
-	struct screen_size* arr;
+struct screen_infos {
+	struct screen_info* arr;
 	int len;
 };
 
+struct screen_info {
+	struct screen_size size;
+	CGDirectDisplayID id;
+};
+
 int get_frontmost_application();
-struct screen_sizes get_desktop_sizes();
+struct screen_infos get_desktop_sizes();
 struct screen_size get_window_size();
 void resize_current_window(int p1, int p2, int p, int p4);
+CGPoint get_cursor_pos();
 
 #endif

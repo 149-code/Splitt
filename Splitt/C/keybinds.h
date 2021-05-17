@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "utils.h"
 
 struct keybind {
 	char escape_char;
+	bool is_cursor_swap;
 	float window_pos[4];
 };
 
