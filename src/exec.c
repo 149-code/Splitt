@@ -37,8 +37,8 @@ void resize_current_window(int x, int y, int dx, int dy)
 		return;
 
 	AXUIElementRef app = AXUIElementCreateApplication(pid);
-	AXUIElementRef win;
 
+	AXUIElementRef win;
 	AXUIElementCopyAttributeValue(app, kAXMainWindowAttribute, (CFTypeRef*) &win);
 
 	CGPoint point = {x, y};
@@ -55,12 +55,7 @@ struct screen_size get_window_size()
 {
 	int pid = get_frontmost_application();
 	if (pid == -1)
-		return (struct screen_size){
-			0,
-			0,
-			0,
-			0,
-		};
+		return (struct screen_size){0, 0, 0, 0};
 
 	AXUIElementRef app = AXUIElementCreateApplication(pid);
 	AXUIElementRef win;
@@ -90,28 +85,41 @@ struct screen_size get_window_size()
 	return ret;
 }
 
-struct screen_sizes get_desktop_sizes()
+struct screen_infos get_desktop_sizes()
 {
 	CGDirectDisplayID display_buffer[9];
 	unsigned int num_displays;
 
 	CGGetActiveDisplayList(9, display_buffer, &num_displays);
 
-	struct screen_sizes ret = {
+	struct screen_infos ret = {
 		.len = num_displays,
-		.arr = malloc(sizeof(struct screen_size) * num_displays),
+		.arr = malloc(sizeof(struct screen_info) * num_displays),
 	};
 
 	for (int i = 0; i < num_displays; i++)
 	{
 		CGRect display_bounds = CGDisplayBounds(display_buffer[i]);
-		ret.arr[i] = (struct screen_size){
-			.x = display_bounds.origin.x,
-			.y = display_bounds.origin.y,
-			.dx = display_bounds.size.width,
-			.dy = display_bounds.size.height,
+		ret.arr[i] = (struct screen_info){
+			.id = display_buffer[i],
+			.size =
+				(struct screen_size){
+					.x = display_bounds.origin.x,
+					.y = display_bounds.origin.y,
+					.dx = display_bounds.size.width,
+					.dy = display_bounds.size.height,
+				},
 		};
 	}
 
 	return ret;
+}
+
+CGPoint get_cursor_pos()
+{
+	CGEventRef ourEvent = CGEventCreate(NULL);
+	CGPoint point = CGEventGetLocation(ourEvent);
+	CFRelease(ourEvent);
+
+	return point;
 }

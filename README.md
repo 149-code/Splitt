@@ -18,6 +18,9 @@ This programm uses a keybinds file to declare custom keybinds, its located in th
 The format is "key": x1,y1,x2,y2, where key is the key you hit after Cntl-S and the numbers (x1, x2, y1, y2) are the positions of the windows scaled between 0 to 1.
 i.e. is (x1, y1) = (0.5, 0) - This means the top corner of the window is halfway across the window horizontally and at the top vartically
 
+You can also swap your cursor between different windows by binding a letter to cursor (i.e.) "c": cursor. If a window number is given, this will move your cursor to that window
+otherwise, it will just move your cursor to the next window.
+
 # Compiling
     git clone https://github.com/149-code/Splitt
     cd Splitt
